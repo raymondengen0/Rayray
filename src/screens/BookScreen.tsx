@@ -10,8 +10,11 @@ import {
   type Service,
 } from "../data/store";
 import {
+  getSlotsForDate,
+  getUnavailableSlots,
   hoursSummary,
   nextOpenDays,
+  type UnavailableSlots,
 } from "../data/availability";
 import AvailabilityGrid, { type SlotSelection } from "./AvailabilityGrid";
 
@@ -30,11 +33,13 @@ export default function BookScreen() {
   // Only days we're actually open (Sundays skipped automatically).
   const days = nextOpenDays(7);
 
-  // Slots already taken, so the grid can mark them booked.
-  const bookedSlots = new Map<string, Set<string>>();
-  for (const b of listBookings()) {
-    if (!bookedSlots.has(b.date)) bookedSlots.set(b.date, new Set());
-    bookedSlots.get(b.date)!.add(b.timeSlot);
+  // Slots already taken plus buffer time, so the grid can mark them.
+  const unavailable = new Map<string, UnavailableSlots>();
+  for (const d of days) {
+    const bookedOnDay = listBookings()
+      .filter((b) => b.date === d)
+      .map((b) => b.timeSlot);
+    unavailable.set(d, getUnavailableSlots(getSlotsForDate(d), bookedOnDay));
   }
 
   function reset() {
@@ -125,7 +130,7 @@ export default function BookScreen() {
             <Text style={styles.label}>Tap an open time to book it</Text>
             <AvailabilityGrid
               days={days}
-              bookedSlots={bookedSlots}
+              unavailable={unavailable}
               selection={selection}
               onSelect={setSelection}
             />

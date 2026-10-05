@@ -9,7 +9,7 @@ import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { colors } from "../theme";
 import { formatDate } from "../data/store";
-import { formatSlotLabel, getSlotsForDate } from "../data/availability";
+import { formatSlotLabel, getSlotsForDate, type UnavailableSlots } from "../data/availability";
 
 export interface SlotSelection {
   date: string; // ISO date, e.g. "2026-10-07"
@@ -25,14 +25,14 @@ const DAY_COL_WIDTH = 92;
 
 export default function AvailabilityGrid({
   days,
-  bookedSlots,
+  unavailable,
   selection,
   onSelect,
 }: {
   /** ISO dates for the grid columns (open days only). */
   days: string[];
-  /** Slots already booked, keyed by ISO date. */
-  bookedSlots: Map<string, Set<string>>;
+  /** Booked and buffer-blocked slots, keyed by ISO date. */
+  unavailable: Map<string, UnavailableSlots>;
   selection: SlotSelection | null;
   onSelect: (s: SlotSelection) => void;
 }) {
@@ -62,7 +62,9 @@ export default function AvailabilityGrid({
               </View>
               {days.map((d) => {
                 const isOpen = openByDay.get(d)?.has(label) ?? false;
-                const isBooked = bookedSlots.get(d)?.has(label) ?? false;
+                const dayUnavailable = unavailable.get(d);
+                const isBooked = dayUnavailable?.booked.has(label) ?? false;
+                const isBuffer = !isBooked && (dayUnavailable?.buffer.has(label) ?? false);
                 const isSelected = selection?.date === d && selection?.slot === label;
 
                 if (!isOpen) {
@@ -76,6 +78,13 @@ export default function AvailabilityGrid({
                   return (
                     <View key={d} style={[gridStyles.cell, gridStyles.bookedCell]}>
                       <Text style={gridStyles.bookedText}>Booked</Text>
+                    </View>
+                  );
+                }
+                if (isBuffer) {
+                  return (
+                    <View key={d} style={[gridStyles.cell, gridStyles.bufferCell]}>
+                      <Text style={gridStyles.bufferText}>Buffer</Text>
                     </View>
                   );
                 }
@@ -165,6 +174,15 @@ const gridStyles = StyleSheet.create({
   bookedText: {
     fontSize: 12,
     color: "#fca5a5",
+    fontWeight: "600",
+  },
+  bufferCell: {
+    width: DAY_COL_WIDTH,
+    backgroundColor: "#fffbeb",
+  },
+  bufferText: {
+    fontSize: 12,
+    color: colors.warning,
     fontWeight: "600",
   },
 });

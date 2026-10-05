@@ -28,6 +28,13 @@ export const WEEKLY_HOURS: (DayHours | null)[] = [
 /** Slot length in minutes. */
 export const SLOT_MINUTES = 60;
 
+/**
+ * Buffer time held after each booking, in minutes. After a booking, any
+ * open slot starting inside (job end + buffer) is blocked, so a job that
+ * runs long doesn't make you late for the next customer.
+ */
+export const BUFFER_MINUTES = 30;
+
 function parseTime(t: string): number {
   const [h, m] = t.split(":").map(Number);
   return h * 60 + m;
@@ -38,6 +45,42 @@ export function formatSlotLabel(hour24: number): string {
   const suffix = hour24 < 12 ? "AM" : "PM";
   const h12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
   return `${h12}:00 ${suffix}`;
+}
+
+/** Minutes since midnight for a slot label like "8:00 AM". */
+function slotLabelToMinutes(label: string): number {
+  const m = label.match(/^(\d+):(\d+)\s(AM|PM)$/);
+  if (!m) return 0;
+  let h = Number(m[1]) % 12;
+  if (m[3] === "PM") h += 12;
+  return h * 60 + Number(m[2]);
+}
+
+export interface UnavailableSlots {
+  /** Slots with a confirmed booking. */
+  booked: Set<string>;
+  /** Open slots held as buffer after a booking. */
+  buffer: Set<string>;
+}
+
+/**
+ * Split a day's open slots into booked vs buffer-blocked, given the booked
+ * slot labels. A slot is buffer-blocked when it starts before
+ * (booked slot start + SLOT_MINUTES + BUFFER_MINUTES).
+ */
+export function getUnavailableSlots(openSlots: string[], bookedSlots: string[]): UnavailableSlots {
+  const booked = new Set(bookedSlots);
+  const buffer = new Set<string>();
+  const openStarts = openSlots.map((s) => ({ label: s, start: slotLabelToMinutes(s) }));
+  for (const b of bookedSlots) {
+    const blockedUntil = slotLabelToMinutes(b) + SLOT_MINUTES + BUFFER_MINUTES;
+    for (const o of openStarts) {
+      if (o.start > slotLabelToMinutes(b) && o.start < blockedUntil) {
+        buffer.add(o.label);
+      }
+    }
+  }
+  return { booked, buffer };
 }
 
 /** Weekday index (0=Sunday..6=Saturday) for an ISO date string. */

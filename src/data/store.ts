@@ -14,7 +14,7 @@
  */
 import { SERVICES, getServiceById } from "./services";
 import { MOCK_INVOICES } from "./mockInvoices";
-import { getSlotsForDate, isOpenOn } from "./availability";
+import { getSlotsForDate, getUnavailableSlots, isOpenOn } from "./availability";
 
 // ---------------------------------------------------------------------------
 // Interfaces
@@ -113,8 +113,14 @@ export function createBooking(input: CreateBookingInput): Booking {
   if (!service) {
     throw new Error(`Unknown service id: ${input.serviceId}`);
   }
-  if (!isOpenOn(input.date) || !getSlotsForDate(input.date).includes(input.timeSlot)) {
+  const openSlots = getSlotsForDate(input.date);
+  if (!isOpenOn(input.date) || !openSlots.includes(input.timeSlot)) {
     throw new Error("That time slot isn't available. Please pick another.");
+  }
+  const bookedOnDate = bookings.filter((b) => b.date === input.date).map((b) => b.timeSlot);
+  const { booked, buffer } = getUnavailableSlots(openSlots, bookedOnDate);
+  if (booked.has(input.timeSlot) || buffer.has(input.timeSlot)) {
+    throw new Error("That time was just taken or is held as a buffer. Please pick another.");
   }
   const booking: Booking = {
     id: generateId("booking"),
