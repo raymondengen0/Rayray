@@ -77,7 +77,7 @@ export default function AvailabilityGrid({
                 if (isBooked) {
                   return (
                     <View key={d} style={[gridStyles.cell, gridStyles.bookedCell]}>
-                      <Text style={gridStyles.bookedText}>Booked</Text>
+                      <Text style={gridStyles.bookedText}>N/A</Text>
                     </View>
                   );
                 }
@@ -95,7 +95,7 @@ export default function AvailabilityGrid({
                     style={[gridStyles.cell, gridStyles.openCell, isSelected && gridStyles.selectedCell]}
                   >
                     <Text style={[gridStyles.openText, isSelected && gridStyles.selectedText]}>
-                      {isSelected ? "✓" : "Open"}
+                      {isSelected ? "✓" : "Available"}
                     </Text>
                   </Pressable>
                 );

@@ -145,7 +145,7 @@ export default function BookScreen() {
 
         {step === "schedule" && (
           <>
-            <Text style={styles.label}>Tap an open time to book it</Text>
+            <Text style={styles.label}>Tap an available time to book it</Text>
             <AvailabilityGrid
               days={days}
               unavailable={unavailable}
