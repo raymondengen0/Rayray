@@ -96,6 +96,7 @@ function mulberry32(seed: number): () => number {
 /**
  * Personal-time slots for a date: PERSONAL_BLOCK_HOURS_PER_DAY open slots,
  * scattered across the day (one picked at random from each third of the day).
+ * On about one day in three, two of the blocked slots sit back to back.
  * Seeded by the date, so the pattern is stable for a given day but never
  * repeats across days.
  */
@@ -105,12 +106,41 @@ export function getPersonalBlockedSlots(isoDate: string, openSlots: string[]): S
   const rand = mulberry32(hashSeed("rayray-personal-" + isoDate));
   const thirds = 3;
   const perThird = Math.ceil(openSlots.length / thirds);
+  const groups: string[][] = [];
   for (let t = 0; t < thirds; t++) {
-    const group = openSlots
-      .slice(t * perThird, (t + 1) * perThird)
-      .filter((s) => !blocked.has(s));
-    if (group.length === 0) continue;
-    blocked.add(group[Math.floor(rand() * group.length)]);
+    groups.push(openSlots.slice(t * perThird, (t + 1) * perThird));
+  }
+
+  const pickOne = (g: string[]) => {
+    const avail = g.filter((s) => !blocked.has(s));
+    if (avail.length === 0) return;
+    blocked.add(avail[Math.floor(rand() * avail.length)]);
+  };
+
+  const pickAdjacentPair = (g: string[]) => {
+    const avail = g.filter((s) => !blocked.has(s));
+    const pairStarts = avail.filter(
+      (_, i) =>
+        i < avail.length - 1 &&
+        slotLabelToMinutes(avail[i + 1]) === slotLabelToMinutes(avail[i]) + SLOT_MINUTES
+    );
+    if (pairStarts.length === 0) {
+      pickOne(g);
+      return;
+    }
+    const start = pairStarts[Math.floor(rand() * pairStarts.length)];
+    blocked.add(start);
+    blocked.add(avail[avail.indexOf(start) + 1]);
+  };
+
+  if (rand() < 0.35) {
+    // The odd day: two blocked slots back to back, plus one elsewhere.
+    const pairThird = Math.floor(rand() * thirds);
+    const singleThird = (pairThird + 1 + Math.floor(rand() * (thirds - 1))) % thirds;
+    pickAdjacentPair(groups[pairThird]);
+    pickOne(groups[singleThird]);
+  } else {
+    groups.forEach(pickOne);
   }
   return blocked;
 }
