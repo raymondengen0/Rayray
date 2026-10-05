@@ -74,17 +74,10 @@ export default function AvailabilityGrid({
                     </View>
                   );
                 }
-                if (isBooked) {
+                if (isBooked || isBuffer) {
                   return (
                     <View key={d} style={[gridStyles.cell, gridStyles.bookedCell]}>
                       <Text style={gridStyles.bookedText}>N/A</Text>
-                    </View>
-                  );
-                }
-                if (isBuffer) {
-                  return (
-                    <View key={d} style={[gridStyles.cell, gridStyles.bufferCell]}>
-                      <Text style={gridStyles.bufferText}>Buffer</Text>
                     </View>
                   );
                 }
@@ -174,15 +167,6 @@ const gridStyles = StyleSheet.create({
   bookedText: {
     fontSize: 12,
     color: "#fca5a5",
-    fontWeight: "600",
-  },
-  bufferCell: {
-    width: DAY_COL_WIDTH,
-    backgroundColor: "#fffbeb",
-  },
-  bufferText: {
-    fontSize: 12,
-    color: colors.warning,
     fontWeight: "600",
   },
 });
