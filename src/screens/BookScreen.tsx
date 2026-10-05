@@ -57,7 +57,7 @@ export default function BookScreen() {
     const bookedOnDay = listBookings()
       .filter((b) => b.date === d)
       .map((b) => b.timeSlot);
-    unavailable.set(d, getUnavailableSlots(getSlotsForDate(d), bookedOnDay));
+    unavailable.set(d, getUnavailableSlots(d, getSlotsForDate(d), bookedOnDay));
   }
 
   function reset() {

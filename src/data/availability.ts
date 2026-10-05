@@ -35,6 +35,12 @@ export const SLOT_MINUTES = 60;
  */
 export const BUFFER_MINUTES = 30;
 
+/**
+ * Hours per day held back as personal time. These are scattered randomly
+ * across the day (one per third of the day) so there's no visible pattern.
+ */
+export const PERSONAL_BLOCK_HOURS_PER_DAY = 3;
+
 function parseTime(t: string): number {
   const [h, m] = t.split(":").map(Number);
   return h * 60 + m;
@@ -61,26 +67,78 @@ export interface UnavailableSlots {
   booked: Set<string>;
   /** Open slots held as buffer after a booking. */
   buffer: Set<string>;
+  /** Open slots held as personal time, scattered randomly through the day. */
+  personal: Set<string>;
+}
+
+/** FNV-1a hash of a string, for seeding the daily random. */
+function hashSeed(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/** Deterministic PRNG (mulberry32) so each day's pattern is stable. */
+function mulberry32(seed: number): () => number {
+  let a = seed;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 /**
- * Split a day's open slots into booked vs buffer-blocked, given the booked
- * slot labels. A slot is buffer-blocked when it starts before
- * (booked slot start + SLOT_MINUTES + BUFFER_MINUTES).
+ * Personal-time slots for a date: PERSONAL_BLOCK_HOURS_PER_DAY open slots,
+ * scattered across the day (one picked at random from each third of the day).
+ * Seeded by the date, so the pattern is stable for a given day but never
+ * repeats across days.
  */
-export function getUnavailableSlots(openSlots: string[], bookedSlots: string[]): UnavailableSlots {
+export function getPersonalBlockedSlots(isoDate: string, openSlots: string[]): Set<string> {
+  const blocked = new Set<string>();
+  if (openSlots.length === 0) return blocked;
+  const rand = mulberry32(hashSeed("rayray-personal-" + isoDate));
+  const thirds = 3;
+  const perThird = Math.ceil(openSlots.length / thirds);
+  for (let t = 0; t < thirds; t++) {
+    const group = openSlots
+      .slice(t * perThird, (t + 1) * perThird)
+      .filter((s) => !blocked.has(s));
+    if (group.length === 0) continue;
+    blocked.add(group[Math.floor(rand() * group.length)]);
+  }
+  return blocked;
+}
+
+/**
+ * Split a day's open slots into booked vs buffer-blocked vs personal time,
+ * given the date and the booked slot labels. A slot is buffer-blocked when
+ * it starts before (booked slot start + SLOT_MINUTES + BUFFER_MINUTES).
+ */
+export function getUnavailableSlots(
+  isoDate: string,
+  openSlots: string[],
+  bookedSlots: string[]
+): UnavailableSlots {
   const booked = new Set(bookedSlots);
   const buffer = new Set<string>();
   const openStarts = openSlots.map((s) => ({ label: s, start: slotLabelToMinutes(s) }));
   for (const b of bookedSlots) {
-    const blockedUntil = slotLabelToMinutes(b) + SLOT_MINUTES + BUFFER_MINUTES;
+    const bStart = slotLabelToMinutes(b);
+    const blockedUntil = bStart + SLOT_MINUTES + BUFFER_MINUTES;
     for (const o of openStarts) {
-      if (o.start > slotLabelToMinutes(b) && o.start < blockedUntil) {
+      if (o.start > bStart && o.start < blockedUntil) {
         buffer.add(o.label);
       }
     }
   }
-  return { booked, buffer };
+  const personal = getPersonalBlockedSlots(isoDate, openSlots);
+  return { booked, buffer, personal };
 }
 
 /** Weekday index (0=Sunday..6=Saturday) for an ISO date string. */

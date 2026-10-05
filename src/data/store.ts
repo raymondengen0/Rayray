@@ -119,8 +119,8 @@ export function createBooking(input: CreateBookingInput): Booking {
     throw new Error("That time slot isn't available. Please pick another.");
   }
   const bookedOnDate = bookings.filter((b) => b.date === input.date).map((b) => b.timeSlot);
-  const { booked, buffer } = getUnavailableSlots(openSlots, bookedOnDate);
-  if (booked.has(input.timeSlot) || buffer.has(input.timeSlot)) {
+  const { booked, buffer, personal } = getUnavailableSlots(input.date, openSlots, bookedOnDate);
+  if (booked.has(input.timeSlot) || buffer.has(input.timeSlot) || personal.has(input.timeSlot)) {
     throw new Error("That time was just taken or is held as a buffer. Please pick another.");
   }
   const booking: Booking = {

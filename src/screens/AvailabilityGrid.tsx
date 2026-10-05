@@ -65,6 +65,7 @@ export default function AvailabilityGrid({
                 const dayUnavailable = unavailable.get(d);
                 const isBooked = dayUnavailable?.booked.has(label) ?? false;
                 const isBuffer = !isBooked && (dayUnavailable?.buffer.has(label) ?? false);
+                const isPersonal = !isBooked && !isBuffer && (dayUnavailable?.personal.has(label) ?? false);
                 const isSelected = selection?.date === d && selection?.slot === label;
 
                 if (!isOpen) {
@@ -74,7 +75,7 @@ export default function AvailabilityGrid({
                     </View>
                   );
                 }
-                if (isBooked || isBuffer) {
+                if (isBooked || isBuffer || isPersonal) {
                   return (
                     <View key={d} style={[gridStyles.cell, gridStyles.bookedCell]}>
                       <Text style={gridStyles.bookedText}>N/A</Text>
