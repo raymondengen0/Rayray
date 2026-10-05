@@ -61,6 +61,20 @@ export const SERVICES: Service[] = [
     priceRange: "$70–$180",
     typicalDuration: "2–5 hours",
   },
+  {
+    id: "room-renovation",
+    name: "Room Renovation",
+    description: "Full room makeovers — flooring, trim, paint and fixtures, handled start to finish.",
+    priceRange: "$800–$3,000",
+    typicalDuration: "2–5 days",
+  },
+  {
+    id: "bathroom-renovation",
+    name: "Bathroom Renovation",
+    description: "Bathroom remodels — tiling, vanities, fixtures and finishing touches.",
+    priceRange: "$1,500–$6,000",
+    typicalDuration: "3–7 days",
+  },
 ];
 
 /** Look up a service by id. Returns undefined for unknown ids. */
