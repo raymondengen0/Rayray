@@ -39,7 +39,7 @@ function ServiceBubble({ service, onClose }: { service: Service; onClose: () => 
           <Text style={styles.cardTitle}>{service.name}</Text>
           <Text style={[styles.cardText, { marginTop: 8 }]}>{service.description}</Text>
 
-          <Text style={[styles.cardTitle, { fontSize: 15, marginTop: 14 }]}>What's included</Text>
+          <Text style={[styles.cardTitle, { fontSize: 15, marginTop: 14 }]}>Optional add-ons</Text>
           {service.includes.map((item) => (
             <Text key={item} style={[styles.cardText, { marginTop: 4 }]}>
               • {item}
