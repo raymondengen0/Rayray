@@ -1,7 +1,7 @@
 /**
  * Services tab: each service is a tappable heading. Tapping one opens a
  * detail bubble (modal) with the full description, pricing, and buttons to
- * book or request a quote for that service.
+ * book or request an estimate for that service.
  */
 import React, { useState } from "react";
 import {
@@ -27,9 +27,9 @@ function ServiceBubble({ service, onClose }: { service: Service; onClose: () => 
     navigation.navigate("Book", { serviceId: service.id });
   }
 
-  function goQuote() {
+  function goEstimate() {
     onClose();
-    navigation.navigate("Quotes", { serviceId: service.id });
+    navigation.navigate("Estimates", { serviceId: service.id });
   }
 
   return (
@@ -38,7 +38,15 @@ function ServiceBubble({ service, onClose }: { service: Service; onClose: () => 
         <Pressable style={bubbleStyles.bubble} onPress={() => {}}>
           <Text style={styles.cardTitle}>{service.name}</Text>
           <Text style={[styles.cardText, { marginTop: 8 }]}>{service.description}</Text>
-          <View style={[styles.metaRow, { marginTop: 12 }]}>
+
+          <Text style={[styles.cardTitle, { fontSize: 15, marginTop: 14 }]}>What's included</Text>
+          {service.includes.map((item) => (
+            <Text key={item} style={[styles.cardText, { marginTop: 4 }]}>
+              • {item}
+            </Text>
+          ))}
+
+          <View style={[styles.metaRow, { marginTop: 14 }]}>
             <Text style={styles.meta}>{service.priceRange}</Text>
             <Text style={[styles.meta, { color: colors.muted }]}>{service.typicalDuration}</Text>
           </View>
@@ -46,8 +54,8 @@ function ServiceBubble({ service, onClose }: { service: Service; onClose: () => 
           <Pressable style={[styles.button, { marginTop: 16 }]} onPress={goBook}>
             <Text style={styles.buttonText}>Book this service</Text>
           </Pressable>
-          <Pressable style={[styles.secondaryButton, { marginTop: 8 }]} onPress={goQuote}>
-            <Text style={styles.secondaryButtonText}>Request a quote</Text>
+          <Pressable style={[styles.secondaryButton, { marginTop: 8 }]} onPress={goEstimate}>
+            <Text style={styles.secondaryButtonText}>Request an estimate</Text>
           </Pressable>
           <Pressable style={[styles.secondaryButton, { marginTop: 8 }]} onPress={onClose}>
             <Text style={styles.secondaryButtonText}>Close</Text>

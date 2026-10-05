@@ -24,6 +24,7 @@ export interface Service {
   id: string;
   name: string;
   description: string;
+  includes: string[];
   priceRange: string;
   typicalDuration: string;
 }

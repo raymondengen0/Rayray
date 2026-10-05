@@ -4,7 +4,7 @@
  * Entry point. Wires up:
  *  - StripeProvider (reads the publishable key from app.json extras; the
  *    payment screens no-op gracefully when it's the placeholder).
- *  - Bottom tab navigation: Services | Book | Quotes | Invoices.
+ *  - Bottom tab navigation: Services | Book | Estimates | Invoices.
  */
 import React from "react";
 import { Text } from "react-native";
@@ -16,7 +16,7 @@ import { StripeProvider } from "./src/stripe/provider";
 
 import ServicesScreen from "./src/screens/ServicesScreen";
 import BookScreen from "./src/screens/BookScreen";
-import QuotesScreen from "./src/screens/QuotesScreen";
+import EstimatesScreen from "./src/screens/QuotesScreen";
 import InvoicesStack from "./src/screens/invoicesStack";
 import { colors } from "./src/theme";
 import type { TabParamList } from "./src/tabs";
@@ -27,7 +27,7 @@ const Tab = createBottomTabNavigator<TabParamList>();
 const TAB_ICONS: Record<keyof TabParamList, string> = {
   Services: "🛠️",
   Book: "📅",
-  Quotes: "💬",
+  Estimates: "💬",
   Invoices: "🧾",
 };
 
@@ -61,7 +61,7 @@ export default function App() {
         >
           <Tab.Screen name="Services" component={ServicesScreen} options={{ title: "Services" }} />
           <Tab.Screen name="Book" component={BookScreen} options={{ title: "Book" }} />
-          <Tab.Screen name="Quotes" component={QuotesScreen} options={{ title: "Quotes" }} />
+          <Tab.Screen name="Estimates" component={EstimatesScreen} options={{ title: "Estimates" }} />
           <Tab.Screen
             name="Invoices"
             component={InvoicesStack}

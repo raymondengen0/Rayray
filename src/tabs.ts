@@ -4,6 +4,6 @@
 export type TabParamList = {
   Services: undefined;
   Book: { serviceId?: string } | undefined;
-  Quotes: { serviceId?: string } | undefined;
+  Estimates: { serviceId?: string } | undefined;
   Invoices: undefined;
 };

@@ -24,10 +24,18 @@
  * crashing — see handlePay().
  */
 import React, { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import Constants from "expo-constants";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useStripe } from "@stripe/stripe-react-native";
+import { useStripe } from "../stripe/hooks";
 import { colors, styles } from "../theme";
 import {
   formatAmount,
@@ -78,6 +86,14 @@ export default function InvoiceDetailScreen({ route, navigation }: Props) {
       Alert.alert(
         "Backend not connected",
         "Stripe keys look set, but there's no payment backend yet. Update BACKEND_PAYMENT_INTENT_URL in InvoiceDetailScreen.tsx to an endpoint that creates a PaymentIntent and returns its client secret.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+    if (Platform.OS === "web") {
+      Alert.alert(
+        "Payments need the mobile app",
+        "Card payments only work in the mobile app. This web preview is for trying the services, booking, and estimate flows.",
         [{ text: "OK" }]
       );
       return;

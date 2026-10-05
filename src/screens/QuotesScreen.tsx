@@ -25,8 +25,10 @@ function Chip({
   );
 }
 
-export default function QuotesScreen() {
-  const route = useRoute<RouteProp<TabParamList, "Quotes">>();
+// NOTE: file kept as QuotesScreen.tsx for repo history; the tab and all
+// user-facing text call this "Estimates".
+export default function EstimatesScreen() {
+  const route = useRoute<RouteProp<TabParamList, "Estimates">>();
   const services = listServices();
   const [service, setService] = useState<Service | null>(null);
   const [jobDescription, setJobDescription] = useState("");
@@ -87,13 +89,13 @@ export default function QuotesScreen() {
     return (
       <View style={styles.screen}>
         <View style={styles.centerBox}>
-          <Text style={styles.centerTitle}>Quote request sent</Text>
+          <Text style={styles.centerTitle}>Estimate request sent</Text>
           <Text style={styles.centerText}>
             Thanks {name.trim()}! We'll review your {service.name} request and get back to you at{" "}
-            {phone.trim()} with a quote.
+            {phone.trim()} with an estimate.
           </Text>
           <Pressable style={styles.secondaryButton} onPress={reset}>
-            <Text style={styles.secondaryButtonText}>Request another quote</Text>
+            <Text style={styles.secondaryButtonText}>Request another estimate</Text>
           </Pressable>
         </View>
       </View>
@@ -103,7 +105,7 @@ export default function QuotesScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Request a Quote</Text>
+        <Text style={styles.title}>Request an Estimate</Text>
         <Text style={styles.subtitle}>
           Tell us about the job and we'll send you a price.
         </Text>
@@ -178,7 +180,7 @@ export default function QuotesScreen() {
           disabled={!service || !jobDescription.trim() || !name.trim() || !phone.trim()}
           onPress={submit}
         >
-          <Text style={styles.buttonText}>Send quote request</Text>
+          <Text style={styles.buttonText}>Send estimate request</Text>
         </Pressable>
       </ScrollView>
     </View>
