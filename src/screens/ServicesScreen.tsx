@@ -2,6 +2,7 @@ import React from "react";
 import { FlatList, Text, View } from "react-native";
 import { colors, styles } from "../theme";
 import { listServices, type Service } from "../data/store";
+import { hoursSummary } from "../data/availability";
 
 function ServiceCard({ service }: { service: Service }) {
   return (
@@ -30,6 +31,10 @@ export default function ServicesScreen() {
             <Text style={styles.subtitle}>
               What we do, typical prices and how long each job usually takes.
             </Text>
+            <View style={[styles.card, { marginTop: 4 }]}>
+              <Text style={styles.cardTitle}>Hours</Text>
+              <Text style={styles.cardText}>{hoursSummary()}</Text>
+            </View>
           </View>
         }
         renderItem={({ item }) => <ServiceCard service={item} />}

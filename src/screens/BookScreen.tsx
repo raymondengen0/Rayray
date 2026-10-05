@@ -5,14 +5,15 @@ import {
   createBooking,
   formatDate,
   listServices,
-  nextDays,
-  timeSlotLabel,
   type Booking,
   type Service,
   type TimeSlot,
 } from "../data/store";
-
-const TIME_SLOTS: TimeSlot[] = ["morning", "afternoon", "evening"];
+import {
+  getSlotsForDate,
+  hoursSummary,
+  nextOpenDays,
+} from "../data/availability";
 
 type Step = "service" | "schedule" | "details" | "confirmed";
 
@@ -46,7 +47,15 @@ export default function BookScreen() {
   const [address, setAddress] = useState("");
   const [booking, setBooking] = useState<Booking | null>(null);
 
-  const days = nextDays(7);
+  // Only days we're actually open (Sundays skipped automatically).
+  const days = nextOpenDays(14);
+  // Hourly slots inside working hours for the picked day.
+  const slots = date ? getSlotsForDate(date) : [];
+
+  function pickDate(d: string) {
+    setDate(d);
+    setSlot(null); // slots differ per day, so reset the pick
+  }
 
   function reset() {
     setStep("service");
@@ -90,7 +99,7 @@ export default function BookScreen() {
           <Text style={styles.centerText}>
             Thanks {booking.customerName}! We'll call {booking.phone} to confirm your{" "}
             {booking.serviceName} visit on {formatDate(booking.date)},{" "}
-            {timeSlotLabel(booking.timeSlot).toLowerCase()}.
+            {booking.timeSlot.toLowerCase()}.
           </Text>
           <Pressable style={styles.secondaryButton} onPress={reset}>
             <Text style={styles.secondaryButtonText}>Book another service</Text>
@@ -141,22 +150,30 @@ export default function BookScreen() {
                   key={d}
                   label={formatDate(d)}
                   selected={date === d}
-                  onPress={() => setDate(d)}
+                  onPress={() => pickDate(d)}
                 />
               ))}
             </View>
 
             <Text style={styles.label}>Time slot</Text>
-            <View style={styles.chipRow}>
-              {TIME_SLOTS.map((t) => (
-                <Chip
-                  key={t}
-                  label={timeSlotLabel(t)}
-                  selected={slot === t}
-                  onPress={() => setSlot(t)}
-                />
-              ))}
-            </View>
+            {date ? (
+              <View style={styles.chipRow}>
+                {slots.map((t) => (
+                  <Chip
+                    key={t}
+                    label={t}
+                    selected={slot === t}
+                    onPress={() => setSlot(t)}
+                  />
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.cardText}>Pick a day above to see open times.</Text>
+            )}
+
+            <Text style={[styles.cardText, { marginTop: 12 }]}>
+              Hours: {hoursSummary()}
+            </Text>
 
             <Pressable
               style={[styles.button, (!date || !slot) && styles.buttonDisabled]}
@@ -181,7 +198,7 @@ export default function BookScreen() {
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>When</Text>
                 <Text style={styles.summaryValue}>
-                  {formatDate(date)}, {timeSlotLabel(slot)}
+                  {formatDate(date)}, {slot}
                 </Text>
               </View>
               <View style={styles.summaryRow}>

@@ -14,6 +14,7 @@
  */
 import { SERVICES, getServiceById } from "./services";
 import { MOCK_INVOICES } from "./mockInvoices";
+import { getSlotsForDate, isOpenOn } from "./availability";
 
 // ---------------------------------------------------------------------------
 // Interfaces
@@ -27,7 +28,8 @@ export interface Service {
   typicalDuration: string;
 }
 
-export type TimeSlot = "morning" | "afternoon" | "evening";
+/** A bookable time slot label, e.g. "8:00 AM". Generated from src/data/availability.ts. */
+export type TimeSlot = string;
 
 export interface Booking {
   id: string;
@@ -105,11 +107,14 @@ export interface CreateBookingInput {
   address: string;
 }
 
-/** Create a booking. Throws if the service id is unknown. */
+/** Create a booking. Throws if the service id is unknown or the slot isn't available. */
 export function createBooking(input: CreateBookingInput): Booking {
   const service = getServiceById(input.serviceId);
   if (!service) {
     throw new Error(`Unknown service id: ${input.serviceId}`);
+  }
+  if (!isOpenOn(input.date) || !getSlotsForDate(input.date).includes(input.timeSlot)) {
+    throw new Error("That time slot isn't available. Please pick another.");
   }
   const booking: Booking = {
     id: generateId("booking"),
@@ -207,16 +212,9 @@ export function formatDate(isoDate: string): string {
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
-/** Human label for a time slot. */
+/** Human label for a time slot. Slots are already labels (e.g. "8:00 AM"). */
 export function timeSlotLabel(slot: TimeSlot): string {
-  switch (slot) {
-    case "morning":
-      return "Morning (8am–11am)";
-    case "afternoon":
-      return "Afternoon (12pm–4pm)";
-    case "evening":
-      return "Evening (5pm–8pm)";
-  }
+  return slot;
 }
 
 /** Next N calendar days as ISO date strings, starting tomorrow. */
