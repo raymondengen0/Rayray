@@ -1,0 +1,1 @@
+{"compilerOptions":{"allowSyntheticDefaultImports":true,"esModuleInterop":true,"isolatedModules":true,"jsx":"react-native","lib":["esnext"],"module":"esnext","moduleResolution":"bundler","noEmit":true,"resolveJsonModule":true,"skipLibCheck":true,"strict":true,"target":"esnext","types":["react-native"]},"exclude":["node_modules"],"include":["App.tsx","src/**/*"]}

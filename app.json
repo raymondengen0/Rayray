@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Rayray",
+    "slug": "rayray",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "rayray",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#1a73e8"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rayray.app"
+    },
+    "android": {
+      "package": "com.rayray.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#1a73e8"
+      }
+    },
+    "plugins": [
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "",
+          "enableGooglePay": false
+        }
+      ]
+    ],
+    "extra": {
+      // ---------------------------------------------------------------------------
+      // STRIPE CONFIG
+      // Replace with your real Stripe publishable key when you are ready to take
+      // payments. NEVER put a secret key (sk_...) in this file — publishable keys
+      // (pk_test_... / pk_live_...) are safe to ship in the app.
+      //
+      // Stripe secret keys and the PaymentIntent endpoint must live on YOUR
+      // backend server (see src/screens/InvoiceDetailScreen.tsx).
+      // ---------------------------------------------------------------------------
+      "stripePublishableKey": "pk_test_REPLACE_ME"
+    }
+  }
+}
