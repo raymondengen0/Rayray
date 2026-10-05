@@ -7,25 +7,19 @@
  *  - Bottom tab navigation: Services | Book | Quotes | Invoices.
  */
 import React from "react";
+import { Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { StripeProvider } from "@stripe/stripe-react-native";
-import { Text } from "react-native";
+import { StripeProvider } from "./src/stripe/provider";
 
 import ServicesScreen from "./src/screens/ServicesScreen";
 import BookScreen from "./src/screens/BookScreen";
 import QuotesScreen from "./src/screens/QuotesScreen";
 import InvoicesStack from "./src/screens/invoicesStack";
 import { colors } from "./src/theme";
-
-type TabParamList = {
-  Services: undefined;
-  Book: undefined;
-  Quotes: undefined;
-  Invoices: undefined;
-};
+import type { TabParamList } from "./src/tabs";
 
 const Tab = createBottomTabNavigator<TabParamList>();
 

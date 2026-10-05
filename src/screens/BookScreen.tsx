@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useRoute } from "@react-navigation/native";
+import type { RouteProp } from "@react-navigation/native";
 import { colors, styles } from "../theme";
 import {
   createBooking,
+  findService,
   formatDate,
   listBookings,
   listServices,
@@ -17,10 +20,12 @@ import {
   type UnavailableSlots,
 } from "../data/availability";
 import AvailabilityGrid, { type SlotSelection } from "./AvailabilityGrid";
+import type { TabParamList } from "../tabs";
 
 type Step = "service" | "schedule" | "details" | "confirmed";
 
 export default function BookScreen() {
+  const route = useRoute<RouteProp<TabParamList, "Book">>();
   const services = listServices();
   const [step, setStep] = useState<Step>("service");
   const [service, setService] = useState<Service | null>(null);
@@ -29,6 +34,19 @@ export default function BookScreen() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [booking, setBooking] = useState<Booking | null>(null);
+
+  // When launched from a service's detail bubble, preselect that service
+  // and jump straight to the schedule step.
+  useEffect(() => {
+    const id = route.params?.serviceId;
+    if (id) {
+      const s = findService(id);
+      if (s) {
+        setService(s);
+        setStep("schedule");
+      }
+    }
+  }, [route.params?.serviceId]);
 
   // Only days we're actually open (Sundays skipped automatically).
   const days = nextOpenDays(7);

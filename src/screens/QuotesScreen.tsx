@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useRoute } from "@react-navigation/native";
+import type { RouteProp } from "@react-navigation/native";
 import { styles } from "../theme";
-import { createQuote, listServices, type Service } from "../data/store";
+import { createQuote, findService, listServices, type Service } from "../data/store";
+import type { TabParamList } from "../tabs";
 
 function Chip({
   label,
@@ -23,6 +26,7 @@ function Chip({
 }
 
 export default function QuotesScreen() {
+  const route = useRoute<RouteProp<TabParamList, "Quotes">>();
   const services = listServices();
   const [service, setService] = useState<Service | null>(null);
   const [jobDescription, setJobDescription] = useState("");
@@ -31,6 +35,15 @@ export default function QuotesScreen() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+
+  // When launched from a service's detail bubble, preselect that service.
+  useEffect(() => {
+    const id = route.params?.serviceId;
+    if (id) {
+      const s = findService(id);
+      if (s) setService(s);
+    }
+  }, [route.params?.serviceId]);
 
   function reset() {
     setService(null);
