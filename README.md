@@ -72,3 +72,10 @@ message instead of attempting a charge.
 
 Note: the Stripe React Native SDK needs a native build (development build via
 `npx expo run:android/ios` or EAS Build) — it does not work inside Expo Go.
+
+## Assets
+
+- `assets/nailed-it-logo.png` — the Nailed It Handyman Services logo shown on the
+  animated splash screen. This binary is not committed via the API tool; place the
+  logo PNG at that path before building (it is inlined into the web preview at
+  export time).

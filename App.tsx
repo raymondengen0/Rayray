@@ -6,13 +6,15 @@
  *    payment screens no-op gracefully when it's the placeholder).
  *  - Bottom tab navigation: Services | Book | Estimates | Invoices.
  */
-import React from "react";
+import React, { useState } from "react";
 import { Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StripeProvider } from "./src/stripe/provider";
+
+import SplashScreen from "./src/screens/SplashScreen";
 
 import ServicesScreen from "./src/screens/ServicesScreen";
 import BookScreen from "./src/screens/BookScreen";
@@ -41,11 +43,17 @@ export default function App() {
   const publishableKey =
     (Constants.expoConfig?.extra?.stripePublishableKey as string | undefined) ?? "";
 
+  // Animated splash screen shows first; Enter reveals the tabbed app.
+  const [entered, setEntered] = useState(false);
+
   return (
     <StripeProvider
       publishableKey={publishableKey || STRIPE_PLACEHOLDER_KEY}
       merchantIdentifier="" // TODO: add your Apple merchant ID for Apple Pay
     >
+      {!entered ? (
+        <SplashScreen onEnter={() => setEntered(true)} />
+      ) : (
       <NavigationContainer>
         <Tab.Navigator
           screenOptions={({ route }) => ({
@@ -69,6 +77,7 @@ export default function App() {
           />
         </Tab.Navigator>
       </NavigationContainer>
+      )}
       <StatusBar style="auto" />
     </StripeProvider>
   );
