@@ -1,5 +1,5 @@
 /**
- * Cinematic 7-second home screen for the Rayray app.
+ * Cinematic 4-second home screen for the Rayray app.
  *
  * Plays like a video ident: the Nailed It logo dollies in on a navy
  * backdrop, a shine sweeps across it, gold particles drift upward, and a
@@ -125,65 +125,65 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
   const buttonRise = useRef(new Animated.Value(28)).current;
 
   useEffect(() => {
-    // 0 → 1.4s: cinematic dolly-in.
+    // 0 → 0.9s: cinematic dolly-in.
     Animated.parallel([
       Animated.timing(logoOpacity, {
         toValue: 1,
-        duration: 1100,
+        duration: 800,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.timing(logoScale, {
         toValue: 1.04,
-        duration: 1400,
+        duration: 900,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ]).start();
-    // 1.4 → 2.1s: settle.
+    // 0.9 → 1.3s: settle.
     Animated.sequence([
-      Animated.delay(1400),
+      Animated.delay(900),
       Animated.timing(logoScale, {
         toValue: 1,
-        duration: 700,
+        duration: 400,
         easing: Easing.inOut(Easing.sin),
         useNativeDriver: true,
       }),
     ]).start();
-    // Shine sweeps at 1.5s and again at 4s.
+    // Shine sweeps at 1s and again at 2.3s.
     Animated.sequence([
-      Animated.delay(1500),
+      Animated.delay(1000),
       Animated.timing(shineX, {
         toValue: 280,
-        duration: 1200,
+        duration: 800,
         easing: Easing.inOut(Easing.quad),
         useNativeDriver: true,
       }),
     ]).start();
     Animated.sequence([
-      Animated.delay(4000),
+      Animated.delay(2300),
       Animated.timing(shineX, { toValue: -280, duration: 0, useNativeDriver: true }),
       Animated.timing(shineX, {
         toValue: 280,
-        duration: 1300,
+        duration: 800,
         easing: Easing.inOut(Easing.quad),
         useNativeDriver: true,
       }),
     ]).start();
-    // Gentle float from 1.8s onward.
+    // Gentle float from 1.2s onward.
     Animated.sequence([
-      Animated.delay(1800),
+      Animated.delay(1200),
       Animated.loop(
         Animated.sequence([
           Animated.timing(floatY, {
             toValue: -12,
-            duration: 1500,
+            duration: 1200,
             easing: Easing.inOut(Easing.sin),
             useNativeDriver: true,
           }),
           Animated.timing(floatY, {
             toValue: 0,
-            duration: 1500,
+            duration: 1200,
             easing: Easing.inOut(Easing.sin),
             useNativeDriver: true,
           }),
@@ -199,25 +199,25 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
         useNativeDriver: true,
       })
     ).start();
-    // Progress bar fills over the first 6s.
+    // Progress bar fills over the first 3.2s.
     Animated.timing(progress, {
       toValue: 1,
-      duration: 6000,
+      duration: 3200,
       easing: Easing.linear,
       useNativeDriver: false,
     }).start();
-    // 6 → 7s: Enter button rises in.
+    // 3.2 → 4s: Enter button rises in.
     Animated.sequence([
-      Animated.delay(6000),
+      Animated.delay(3200),
       Animated.parallel([
         Animated.timing(buttonOpacity, {
           toValue: 1,
-          duration: 1000,
+          duration: 800,
           useNativeDriver: true,
         }),
         Animated.timing(buttonRise, {
           toValue: 0,
-          duration: 1000,
+          duration: 800,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
