@@ -128,29 +128,17 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
     p.play();
   });
 
-  const toggleMute = () => {
+  const enableSound = () => {
     // Browsers block audible autoplay, so the video starts muted and the
-    // first tap anywhere unmutes it (and makes sure it is playing).
+    // first tap anywhere (on the video, the background, anywhere) enables
+    // sound and makes sure the video is playing. One-way: tapping again
+    // does not re-mute.
     if (muted) {
       player.muted = false;
       player.play();
       setMuted(false);
     }
   };
-
-  // `pointerdown` fires for mouse, touch, and pen alike (unlike onTouchStart,
-  // which never fires for a mouse click). One-shot: the first interaction
-  // anywhere on the page unmutes the video.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const onFirstPointerDown = () => {
-      player.muted = false;
-      player.play();
-      setMuted(false);
-    };
-    window.addEventListener("pointerdown", onFirstPointerDown, { once: true });
-    return () => window.removeEventListener("pointerdown", onFirstPointerDown);
-  }, [player]);
 
   const videoOpacity = useRef(new Animated.Value(0)).current;
   const videoScale = useRef(new Animated.Value(0.92)).current;
@@ -220,6 +208,11 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
   ]);
 
   return (
+    <Pressable
+      onPress={enableSound}
+      style={splashStyles.pressContainer}
+      accessibilityLabel="Intro screen"
+    >
     <LinearGradient
       colors={[
         "rgba(11, 37, 69, 0.55)",
@@ -240,7 +233,7 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
           transform: [{ scale: videoScale }],
         }}
       >
-        <Pressable onPress={toggleMute} accessibilityLabel="Tap for sound">
+        <Pressable onPress={enableSound} accessibilityLabel="Tap for sound">
           <View style={splashStyles.videoFrame}>
             <VideoView
               player={player}
@@ -284,10 +277,14 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
         </Pressable>
       </Animated.View>
     </LinearGradient>
+    </Pressable>
   );
 }
 
 const splashStyles = StyleSheet.create({
+  pressContainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     alignItems: "center",
