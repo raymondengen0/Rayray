@@ -129,15 +129,12 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
   });
 
   const toggleMute = () => {
+    // Browsers block audible autoplay, so the video starts muted and the
+    // first tap anywhere unmutes it (and makes sure it is playing).
     if (muted) {
-      // Tapping the video must both unmute AND make sure it is playing:
-      // on some browsers the muted autoplay never actually started.
       player.muted = false;
       player.play();
       setMuted(false);
-    } else {
-      player.muted = true;
-      setMuted(true);
     }
   };
 
@@ -216,6 +213,7 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
         "rgba(11, 37, 69, 0.55)",
       ]}
       style={splashStyles.container}
+      onTouchStart={toggleMute}
     >
       {PARTICLES.map((p, i) => (
         <Particle key={i} {...p} />
@@ -229,7 +227,7 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
           transform: [{ scale: videoScale }],
         }}
       >
-        <Pressable onPress={toggleMute} accessibilityLabel="Play video with sound">
+        <Pressable onPress={toggleMute} accessibilityLabel="Tap for sound">
           <View style={splashStyles.videoFrame}>
             <VideoView
               player={player}
