@@ -129,9 +129,16 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
   });
 
   const toggleMute = () => {
-    const next = !muted;
-    player.muted = next;
-    setMuted(next);
+    if (muted) {
+      // Tapping the video must both unmute AND make sure it is playing:
+      // on some browsers the muted autoplay never actually started.
+      player.muted = false;
+      player.play();
+      setMuted(false);
+    } else {
+      player.muted = true;
+      setMuted(true);
+    }
   };
 
   const videoOpacity = useRef(new Animated.Value(0)).current;
@@ -229,6 +236,8 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
               style={splashStyles.video}
               contentFit="cover"
               nativeControls={false}
+              playsInline
+              pointerEvents="none"
             />
             {muted && (
               <View style={splashStyles.playOverlay} pointerEvents="none">
