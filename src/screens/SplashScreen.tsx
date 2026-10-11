@@ -128,6 +128,14 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
     p.play();
   });
 
+  // On web the setup callback above runs before the <video> element exists,
+  // so its p.play() is a no-op there. Child effects (VideoView's mount) run
+  // before this parent effect, so the element is mounted by now and this
+  // actually starts the muted autoplay.
+  useEffect(() => {
+    player.play();
+  }, [player]);
+
   const enableSound = () => {
     // Browsers block audible autoplay, so the video starts muted and the
     // first tap anywhere (on the video, the background, anywhere) enables
