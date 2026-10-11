@@ -7,10 +7,13 @@ import { StyleSheet } from "react-native";
 export const colors = {
   primary: "#1a73e8",
   primaryDark: "#1558b0",
+  /** 45% translucent blue — sits over the refinery backdrop. */
+  primaryGlass: "rgba(26, 115, 232, 0.55)",
+  primaryDarkGlass: "rgba(21, 88, 176, 0.55)",
   background: "#f6f8fb",
   card: "#ffffff",
-  text: "#1a1a1a",
-  muted: "#6b7280",
+  text: "#5DADE2",
+  muted: "#5DADE2",
   border: "#e5e7eb",
   success: "#16a34a",
   warning: "#d97706",
@@ -21,7 +24,7 @@ export const colors = {
 export const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: "transparent",
   },
   scrollContent: {
     padding: 16,
@@ -89,7 +92,7 @@ export const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   button: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryGlass,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
@@ -131,8 +134,8 @@ export const styles = StyleSheet.create({
     paddingVertical: 9,
   },
   chipSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: colors.primaryGlass,
+    borderColor: colors.primaryGlass,
   },
   chipText: {
     fontSize: 14,

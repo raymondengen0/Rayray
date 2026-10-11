@@ -1,22 +1,19 @@
 /**
- * Cinematic 4-second home screen for the Rayray app.
+ * Cinematic home screen for the Rayray app.
  *
- * Plays like a video ident: the Nailed It logo dollies in on a navy
- * backdrop, a shine sweeps across it, gold particles drift upward, and a
- * progress bar fills — then the Enter button appears and takes the
- * customer to the Services tab.
+ * Plays like a video ident: the hammer strikes the nail with a spark
+ * burst inside the Nailed It badge (animated image, loops automatically),
+ * the company slogan fades in with a theatrical rise, gold particles drift
+ * upward, and a progress bar fills — then the Enter button appears and
+ * takes the customer to Services.
  */
 import React, { useEffect, useRef } from "react";
 import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-const LOGO = require("../../assets/nailed-it-logo.png");
+const STRIKE = require("../../assets/hammer-strike.webp");
 
 const LOGO_SIZE = 280;
-// The badge fills ~80% of the square image; oversize it inside a circular
-// crop so no white corners show.
-const IMG_SIZE = LOGO_SIZE / 0.8;
-const IMG_OFFSET = -(IMG_SIZE - LOGO_SIZE) / 2;
 
 const GOLD = "#f5a623";
 const NAVY = "#0b2545";
@@ -116,16 +113,17 @@ const PARTICLES = [
 
 export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
   const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoScale = useRef(new Animated.Value(0.72)).current;
-  const shineX = useRef(new Animated.Value(-280)).current;
-  const floatY = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.9)).current;
+  const sloganOpacity = useRef(new Animated.Value(0)).current;
+  const sloganRise = useRef(new Animated.Value(24)).current;
+  const sloganScale = useRef(new Animated.Value(0.92)).current;
   const ringSpin = useRef(new Animated.Value(0)).current;
   const progress = useRef(new Animated.Value(0)).current;
   const buttonOpacity = useRef(new Animated.Value(0)).current;
   const buttonRise = useRef(new Animated.Value(28)).current;
 
   useEffect(() => {
-    // 0 → 0.9s: cinematic dolly-in.
+    // 0 → 0.8s: badge fades in with a gentle settle.
     Animated.parallel([
       Animated.timing(logoOpacity, {
         toValue: 1,
@@ -134,63 +132,46 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
         useNativeDriver: true,
       }),
       Animated.timing(logoScale, {
-        toValue: 1.04,
-        duration: 900,
+        toValue: 1,
+        duration: 1000,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ]).start();
-    // 0.9 → 1.3s: settle.
+    // ~2.2s: right after the on-screen strike, the slogan makes its
+    // theatrical entrance — rising, brightening, and settling.
     Animated.sequence([
-      Animated.delay(900),
-      Animated.timing(logoScale, {
-        toValue: 1,
-        duration: 400,
-        easing: Easing.inOut(Easing.sin),
-        useNativeDriver: true,
-      }),
-    ]).start();
-    // Shine sweeps at 1s and again at 2.3s.
-    Animated.sequence([
-      Animated.delay(1000),
-      Animated.timing(shineX, {
-        toValue: 280,
-        duration: 800,
-        easing: Easing.inOut(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-    Animated.sequence([
-      Animated.delay(2300),
-      Animated.timing(shineX, { toValue: -280, duration: 0, useNativeDriver: true }),
-      Animated.timing(shineX, {
-        toValue: 280,
-        duration: 800,
-        easing: Easing.inOut(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-    // Gentle float from 1.2s onward.
-    Animated.sequence([
-      Animated.delay(1200),
-      Animated.loop(
+      Animated.delay(2200),
+      Animated.parallel([
+        Animated.timing(sloganOpacity, {
+          toValue: 1,
+          duration: 900,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(sloganRise, {
+          toValue: 0,
+          duration: 900,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
         Animated.sequence([
-          Animated.timing(floatY, {
-            toValue: -12,
-            duration: 1200,
+          Animated.timing(sloganScale, {
+            toValue: 1.04,
+            duration: 450,
+            easing: Easing.out(Easing.sin),
+            useNativeDriver: true,
+          }),
+          Animated.timing(sloganScale, {
+            toValue: 1,
+            duration: 450,
             easing: Easing.inOut(Easing.sin),
             useNativeDriver: true,
           }),
-          Animated.timing(floatY, {
-            toValue: 0,
-            duration: 1200,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-        ])
-      ),
+        ]),
+      ]),
     ]).start();
-    // Slow rotating arc around the logo.
+    // Slow rotating arc around the badge.
     Animated.loop(
       Animated.timing(ringSpin, {
         toValue: 1,
@@ -223,7 +204,17 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
         }),
       ]),
     ]).start();
-  }, [logoOpacity, logoScale, shineX, floatY, ringSpin, progress, buttonOpacity, buttonRise]);
+  }, [
+    logoOpacity,
+    logoScale,
+    sloganOpacity,
+    sloganRise,
+    sloganScale,
+    ringSpin,
+    progress,
+    buttonOpacity,
+    buttonRise,
+  ]);
 
   const spin = ringSpin.interpolate({
     inputRange: [0, 1],
@@ -236,7 +227,11 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
 
   return (
     <LinearGradient
-      colors={[NAVY, "#16345f", NAVY]}
+      colors={[
+        "rgba(11, 37, 69, 0.55)",
+        "rgba(22, 52, 95, 0.55)",
+        "rgba(11, 37, 69, 0.55)",
+      ]}
       style={splashStyles.container}
     >
       {PARTICLES.map((p, i) => (
@@ -251,29 +246,30 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
         <Animated.View
           style={{
             opacity: logoOpacity,
-            transform: [{ scale: logoScale }, { translateY: floatY }],
+            transform: [{ scale: logoScale }],
           }}
         >
           <View style={splashStyles.logoClip}>
             <Image
-              source={LOGO}
-              style={{
-                width: IMG_SIZE,
-                height: IMG_SIZE,
-                marginLeft: IMG_OFFSET,
-                marginTop: IMG_OFFSET,
-              }}
+              source={STRIKE}
+              style={splashStyles.strike}
               resizeMode="cover"
-            />
-            <Animated.View
-              style={[
-                splashStyles.shine,
-                { transform: [{ translateX: shineX }, { rotate: "20deg" }] },
-              ]}
             />
           </View>
         </Animated.View>
       </View>
+
+      <Animated.View
+        style={[
+          splashStyles.sloganWrap,
+          {
+            opacity: sloganOpacity,
+            transform: [{ translateY: sloganRise }, { scale: sloganScale }],
+          },
+        ]}
+      >
+        <Text style={splashStyles.slogan}>Get Nailed. Professionally!!</Text>
+      </Animated.View>
 
       <View style={splashStyles.progressTrack}>
         <Animated.View style={[splashStyles.progressFill, { width: progressWidth }]} />
@@ -331,16 +327,26 @@ const splashStyles = StyleSheet.create({
     height: LOGO_SIZE,
     borderRadius: LOGO_SIZE / 2,
     overflow: "hidden",
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(11, 37, 69, 0.55)",
   },
-  shine: {
-    position: "absolute",
-    top: -120,
-    left: LOGO_SIZE / 2 - 35,
-    width: 70,
-    height: LOGO_SIZE + 240,
-    backgroundColor: "#ffffff",
-    opacity: 0.28,
+  strike: {
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
+  },
+  sloganWrap: {
+    marginTop: 26,
+    paddingHorizontal: 16,
+  },
+  slogan: {
+    color: "#5DADE2",
+    fontSize: 26,
+    fontStyle: "italic",
+    fontWeight: "700",
+    letterSpacing: 1.5,
+    textAlign: "center",
+    textShadowColor: "rgba(0, 0, 0, 0.6)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   particle: {
     position: "absolute",
@@ -348,7 +354,7 @@ const splashStyles = StyleSheet.create({
     backgroundColor: GOLD,
   },
   progressTrack: {
-    marginTop: 44,
+    marginTop: 30,
     width: 200,
     height: 3,
     borderRadius: 2,
