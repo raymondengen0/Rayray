@@ -208,10 +208,13 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
   ]);
 
   return (
-    <Pressable
-      onPress={enableSound}
+    <View
       style={splashStyles.pressContainer}
-      accessibilityLabel="Intro screen"
+      onStartShouldSetResponder={() => {
+        enableSound();
+        // Return false so the touch still reaches inner buttons normally.
+        return false;
+      }}
     >
     <LinearGradient
       colors={[
@@ -248,6 +251,7 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
                 <View style={splashStyles.playCircle}>
                   <Text style={splashStyles.playGlyph}>▶</Text>
                 </View>
+                <Text style={splashStyles.playLabel}>TAP FOR SOUND</Text>
               </View>
             )}
           </View>
@@ -277,7 +281,7 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
         </Pressable>
       </Animated.View>
     </LinearGradient>
-    </Pressable>
+    </View>
   );
 }
 
@@ -329,6 +333,16 @@ const splashStyles = StyleSheet.create({
     color: "#fff",
     fontSize: 34,
     marginLeft: 4,
+  },
+  playLabel: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 2,
+    marginTop: 10,
+    textShadowColor: "rgba(0,0,0,0.6)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   sloganWrap: {
     marginTop: 26,
