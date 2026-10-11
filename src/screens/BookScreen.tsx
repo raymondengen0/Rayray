@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import { colors, styles } from "../theme";
@@ -7,7 +7,7 @@ import {
   createBooking,
   findService,
   formatDate,
-  listBookings,
+  getBookedSlots,
   listServices,
   type Booking,
   type Service,
@@ -24,6 +24,8 @@ import type { TabParamList } from "../tabs";
 
 type Step = "service" | "schedule" | "details" | "confirmed";
 
+const BOOKING_BG = require("../../assets/booking-bg.webp");
+
 export default function BookScreen() {
   const route = useRoute<RouteProp<TabParamList, "Book">>();
   const services = listServices();
@@ -34,6 +36,13 @@ export default function BookScreen() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [booking, setBooking] = useState<Booking | null>(null);
+  const [bookedSlots, setBookedSlots] = useState<Map<string, Set<string>>>(new Map());
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Live booked slots from Supabase, so the grid reflects every visitor's bookings.
+  useEffect(() => {
+    getBookedSlots().then(setBookedSlots);
+  }, []);
 
   // When launched from a service's detail bubble, preselect that service
   // and jump straight to the schedule step.
@@ -54,9 +63,7 @@ export default function BookScreen() {
   // Slots already taken plus buffer time, so the grid can mark them.
   const unavailable = new Map<string, UnavailableSlots>();
   for (const d of days) {
-    const bookedOnDay = listBookings()
-      .filter((b) => b.date === d)
-      .map((b) => b.timeSlot);
+    const bookedOnDay = [...(bookedSlots.get(d) ?? [])];
     unavailable.set(d, getUnavailableSlots(d, getSlotsForDate(d), bookedOnDay));
   }
 
@@ -70,14 +77,16 @@ export default function BookScreen() {
     setBooking(null);
   }
 
-  function submit() {
+  async function submit() {
     if (!service || !selection) return;
     if (!name.trim() || !phone.trim() || !address.trim()) {
       Alert.alert("Missing details", "Please enter your name, phone number and address.");
+      setSubmitError("Missing details: please enter your name, phone number and address.");
       return;
     }
+    setSubmitError(null);
     try {
-      const created = createBooking({
+      const created = await createBooking({
         serviceId: service.id,
         date: selection.date,
         timeSlot: selection.slot,
@@ -86,9 +95,19 @@ export default function BookScreen() {
         address: address.trim(),
       });
       setBooking(created);
+      // Reflect the new booking in the grid immediately.
+      setBookedSlots((prev) => {
+        const next = new Map(prev);
+        const set = new Set(next.get(created.date) ?? []);
+        set.add(created.timeSlot);
+        next.set(created.date, set);
+        return next;
+      });
       setStep("confirmed");
     } catch (e) {
-      Alert.alert("Couldn't create booking", e instanceof Error ? e.message : "Unknown error");
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      Alert.alert("Couldn't create booking", msg);
+      setSubmitError(`Couldn't create booking: ${msg}`);
     }
   }
 
@@ -96,6 +115,11 @@ export default function BookScreen() {
   if (step === "confirmed" && booking) {
     return (
       <View style={styles.screen}>
+        <Image
+          source={BOOKING_BG}
+          style={bookStyles.backdrop}
+          resizeMode="cover"
+        />
         <View style={styles.centerBox}>
           <Text style={styles.centerTitle}>Booking confirmed</Text>
           <Text style={styles.centerText}>
@@ -114,6 +138,11 @@ export default function BookScreen() {
   // ---- Multi-step booking form ----
   return (
     <View style={styles.screen}>
+      <Image
+        source={BOOKING_BG}
+        style={bookStyles.backdrop}
+        resizeMode="cover"
+      />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>Book a Service</Text>
         <Text style={styles.subtitle}>
@@ -224,11 +253,13 @@ export default function BookScreen() {
                 styles.button,
                 (!name.trim() || !phone.trim() || !address.trim()) && styles.buttonDisabled,
               ]}
-              disabled={!name.trim() || !phone.trim() || !address.trim()}
               onPress={submit}
             >
               <Text style={styles.buttonText}>Confirm booking</Text>
             </Pressable>
+            {submitError ? (
+              <Text style={{ color: "#dc2626", marginTop: 8, textAlign: "center" }}>{submitError}</Text>
+            ) : null}
             <Pressable style={styles.secondaryButton} onPress={() => setStep("schedule")}>
               <Text style={styles.secondaryButtonText}>Back</Text>
             </Pressable>
@@ -238,3 +269,11 @@ export default function BookScreen() {
     </View>
   );
 }
+
+const bookStyles = StyleSheet.create({
+  backdrop: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+  },
+});
