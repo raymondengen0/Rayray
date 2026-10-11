@@ -3,9 +3,11 @@
  * detail bubble (modal) with the full description, pricing, and buttons to
  * book or request an estimate for that service.
  */
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   FlatList,
+  Image,
   Modal,
   Pressable,
   StyleSheet,
@@ -18,6 +20,8 @@ import { colors, styles } from "../theme";
 import { listServices, type Service } from "../data/store";
 import { hoursSummary } from "../data/availability";
 import type { TabParamList } from "../tabs";
+
+const SERVICES_BG = require("../../assets/construction-bg.webp");
 
 function ServiceBubble({ service, onClose }: { service: Service; onClose: () => void }) {
   const navigation = useNavigation<NavigationProp<TabParamList>>();
@@ -66,12 +70,74 @@ function ServiceBubble({ service, onClose }: { service: Service; onClose: () => 
   );
 }
 
+/** Flashing promo banner for the Total Home Winterization package. */
+function WinterizationBanner({ onPress }: { onPress: () => void }) {
+  const pulse = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 0.55,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [pulse]);
+
+  return (
+    <Pressable onPress={onPress} style={{ marginTop: 8, marginBottom: 4 }}>
+      <Animated.View style={[bannerStyles.banner, { opacity: pulse }]}>
+        <Text style={bannerStyles.bannerTitle}>
+          ❄ Total Home Winterization — $250 flat!
+        </Text>
+        <Text style={bannerStyles.bannerText}>
+          Winterize, draft-proof & safety-check in one visit. Tap to book.
+        </Text>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+const bannerStyles = StyleSheet.create({
+  banner: {
+    backgroundColor: "#f5a623",
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 2,
+    borderColor: "#0b2545",
+  },
+  bannerTitle: {
+    fontSize: 17,
+    fontWeight: "800",
+    color: "#0b2545",
+  },
+  bannerText: {
+    fontSize: 13,
+    color: "#0b2545",
+    marginTop: 4,
+  },
+});
+
 export default function ServicesScreen() {
   const services = listServices();
   const [selected, setSelected] = useState<Service | null>(null);
 
   return (
     <View style={styles.screen}>
+      <Image
+        source={SERVICES_BG}
+        style={bubbleStyles.localBackdrop}
+        resizeMode="cover"
+      />
       <FlatList
         data={services}
         keyExtractor={(s) => s.id}
@@ -80,6 +146,15 @@ export default function ServicesScreen() {
           <View>
             <Text style={styles.title}>Our Services</Text>
             <Text style={styles.subtitle}>Tap a service to see the details.</Text>
+            {services.find((s) => s.id === "total-home-winterization") && (
+              <WinterizationBanner
+                onPress={() =>
+                  setSelected(
+                    services.find((s) => s.id === "total-home-winterization")!
+                  )
+                }
+              />
+            )}
             <View style={[styles.card, { marginTop: 4, marginBottom: 8 }]}>
               <Text style={styles.cardTitle}>Hours</Text>
               <Text style={styles.cardText}>{hoursSummary()}</Text>
@@ -101,6 +176,11 @@ export default function ServicesScreen() {
 }
 
 const bubbleStyles = StyleSheet.create({
+  localBackdrop: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+  },
   headingRow: {
     flexDirection: "row",
     alignItems: "center",
