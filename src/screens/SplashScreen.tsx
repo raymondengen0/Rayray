@@ -138,6 +138,20 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
     }
   };
 
+  // `pointerdown` fires for mouse, touch, and pen alike (unlike onTouchStart,
+  // which never fires for a mouse click). One-shot: the first interaction
+  // anywhere on the page unmutes the video.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onFirstPointerDown = () => {
+      player.muted = false;
+      player.play();
+      setMuted(false);
+    };
+    window.addEventListener("pointerdown", onFirstPointerDown, { once: true });
+    return () => window.removeEventListener("pointerdown", onFirstPointerDown);
+  }, [player]);
+
   const videoOpacity = useRef(new Animated.Value(0)).current;
   const videoScale = useRef(new Animated.Value(0.92)).current;
   const sloganOpacity = useRef(new Animated.Value(0)).current;
@@ -213,7 +227,6 @@ export default function SplashScreen({ onEnter }: { onEnter: () => void }) {
         "rgba(11, 37, 69, 0.55)",
       ]}
       style={splashStyles.container}
-      onTouchStart={toggleMute}
     >
       {PARTICLES.map((p, i) => (
         <Particle key={i} {...p} />
