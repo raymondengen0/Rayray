@@ -145,7 +145,7 @@ export default function ServicesScreen() {
         ListHeaderComponent={
           <View>
             <Text style={styles.title}>Our Services</Text>
-            <Text style={styles.subtitle}>Tap a service to see the details.</Text>
+            <Text style={[styles.subtitle, { color: colors.text }]}>Tap a service to see the details.</Text>
             {services.find((s) => s.id === "total-home-winterization") && (
               <WinterizationBanner
                 onPress={() =>
