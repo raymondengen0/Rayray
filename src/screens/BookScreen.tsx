@@ -26,6 +26,9 @@ type Step = "service" | "schedule" | "details" | "confirmed";
 
 const BOOKING_BG = require("../../assets/booking-bg.webp");
 
+// Brighter baby blue, booking section only — the rest of the app keeps #5DADE2.
+const BOOK_BLUE = "#8FCDF6";
+
 export default function BookScreen() {
   const route = useRoute<RouteProp<TabParamList, "Book">>();
   const services = listServices();
@@ -120,9 +123,10 @@ export default function BookScreen() {
           style={bookStyles.backdrop}
           resizeMode="cover"
         />
+        <View style={bookStyles.scrim} />
         <View style={styles.centerBox}>
-          <Text style={styles.centerTitle}>Booking confirmed</Text>
-          <Text style={styles.centerText}>
+          <Text style={[styles.centerTitle, bookStyles.brightText]}>Booking confirmed</Text>
+          <Text style={[styles.centerText, bookStyles.brightText]}>
             Thanks {booking.customerName}! We'll call {booking.phone} to confirm your{" "}
             {booking.serviceName} visit on {formatDate(booking.date)},{" "}
             {booking.timeSlot.toLowerCase()}.
@@ -143,9 +147,10 @@ export default function BookScreen() {
         style={bookStyles.backdrop}
         resizeMode="cover"
       />
+      <View style={bookStyles.scrim} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Book a Service</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, bookStyles.brightText]}>Book a Service</Text>
+        <Text style={[styles.subtitle, bookStyles.brightText]}>
           {step === "service" && "Step 1 of 3 — choose a service"}
           {step === "schedule" && "Step 2 of 3 — pick a day and time"}
           {step === "details" && "Step 3 of 3 — your details"}
@@ -162,8 +167,8 @@ export default function BookScreen() {
                 }}
               >
                 <View style={styles.card}>
-                  <Text style={styles.cardTitle}>{s.name}</Text>
-                  <Text style={styles.cardText}>
+                  <Text style={[styles.cardTitle, bookStyles.brightText]}>{s.name}</Text>
+                  <Text style={[styles.cardText, bookStyles.brightText]}>
                     {s.priceRange} · {s.typicalDuration}
                   </Text>
                 </View>
@@ -174,7 +179,7 @@ export default function BookScreen() {
 
         {step === "schedule" && (
           <>
-            <Text style={styles.label}>Tap an available time to book it</Text>
+            <Text style={[styles.label, bookStyles.brightText]}>Tap an available time to book it</Text>
             <AvailabilityGrid
               days={days}
               unavailable={unavailable}
@@ -182,7 +187,7 @@ export default function BookScreen() {
               onSelect={setSelection}
             />
 
-            <Text style={[styles.cardText, { marginTop: 12 }]}>
+            <Text style={[styles.cardText, { marginTop: 12 }, bookStyles.brightText]}>
               Hours: {hoursSummary()}
             </Text>
 
@@ -207,22 +212,22 @@ export default function BookScreen() {
           <>
             <View style={styles.card}>
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Service</Text>
-                <Text style={styles.summaryValue}>{service.name}</Text>
+                <Text style={[styles.summaryLabel, bookStyles.brightText]}>Service</Text>
+                <Text style={[styles.summaryValue, bookStyles.brightText]}>{service.name}</Text>
               </View>
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>When</Text>
-                <Text style={styles.summaryValue}>
+                <Text style={[styles.summaryLabel, bookStyles.brightText]}>When</Text>
+                <Text style={[styles.summaryValue, bookStyles.brightText]}>
                   {formatDate(selection.date)}, {selection.slot}
                 </Text>
               </View>
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Estimate</Text>
-                <Text style={styles.summaryValue}>{service.priceRange}</Text>
+                <Text style={[styles.summaryLabel, bookStyles.brightText]}>Estimate</Text>
+                <Text style={[styles.summaryValue, bookStyles.brightText]}>{service.priceRange}</Text>
               </View>
             </View>
 
-            <Text style={styles.label}>Full name</Text>
+            <Text style={[styles.label, bookStyles.brightText]}>Full name</Text>
             <TextInput
               style={styles.input}
               placeholder="Jane Smith"
@@ -231,7 +236,7 @@ export default function BookScreen() {
               autoCapitalize="words"
             />
 
-            <Text style={styles.label}>Phone</Text>
+            <Text style={[styles.label, bookStyles.brightText]}>Phone</Text>
             <TextInput
               style={styles.input}
               placeholder="(306) 555-0100"
@@ -240,7 +245,7 @@ export default function BookScreen() {
               keyboardType="phone-pad"
             />
 
-            <Text style={styles.label}>Address</Text>
+            <Text style={[styles.label, bookStyles.brightText]}>Address</Text>
             <TextInput
               style={styles.input}
               placeholder="123 Main St, Saskatoon"
@@ -275,5 +280,15 @@ const bookStyles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
+  },
+  // Dims the workbench background so the brighter text pops.
+  scrim: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  brightText: {
+    color: BOOK_BLUE,
   },
 });

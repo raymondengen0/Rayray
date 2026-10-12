@@ -117,25 +117,25 @@ const gridStyles = StyleSheet.create({
   },
   cornerCell: {
     width: TIME_COL_WIDTH,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "transparent",
   },
   headerCell: {
     width: DAY_COL_WIDTH,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "transparent",
   },
   headerText: {
     fontSize: 12,
     fontWeight: "700",
-    color: colors.text,
+    color: "#8FCDF6",
     textAlign: "center",
   },
   timeCell: {
     width: TIME_COL_WIDTH,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "transparent",
   },
   timeText: {
     fontSize: 12,
-    color: colors.muted,
+    color: "#8FCDF6",
   },
   openCell: {
     width: DAY_COL_WIDTH,
@@ -147,7 +147,7 @@ const gridStyles = StyleSheet.create({
     fontWeight: "600",
   },
   selectedCell: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryGlass,
   },
   selectedText: {
     color: "#ffffff",
