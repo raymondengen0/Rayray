@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
-import { styles } from "../theme";
+import { colors, styles } from "../theme";
 import { createQuote, findService, listServices, type Service } from "../data/store";
 import type { TabParamList } from "../tabs";
 
@@ -122,6 +122,43 @@ export default function EstimatesScreen() {
           ))}
         </View>
 
+        {service && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Estimate breakdown</Text>
+            <Text style={[styles.cardText, { marginBottom: 8 }]}>
+              How the {service.name} price breaks down. Materials are included in the
+              price shown — there is no separate materials charge.
+            </Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>
+                Labor — {service.name} ({service.typicalDuration})
+              </Text>
+              <Text style={styles.summaryValue}>{service.priceRange}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Materials & supplies</Text>
+              <Text style={styles.summaryValue}>Included</Text>
+            </View>
+            <View
+              style={[
+                styles.summaryRow,
+                {
+                  borderTopWidth: 1,
+                  borderTopColor: colors.border,
+                  marginTop: 6,
+                  paddingTop: 10,
+                },
+              ]}
+            >
+              <Text
+                style={[styles.summaryLabel, { fontWeight: "700", color: colors.text }]}
+              >
+                Total estimate
+              </Text>
+              <Text style={styles.summaryValue}>{service.priceRange}</Text>
+            </View>
+          </View>
+        )}
         <Text style={styles.label}>Job description</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
